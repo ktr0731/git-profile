@@ -15,7 +15,7 @@ const (
 )
 
 var configPath string
-var profiles Profiles
+var profiles *Profiles
 
 type Profile struct {
 	Title string
@@ -28,15 +28,36 @@ type Profile struct {
 
 type Profiles []Profile
 
-func (p Profiles) Add(profile Profile) error {
-	for _, prof := range p {
+func (p *Profiles) Add(profile *Profile) error {
+	for _, prof := range *p {
 		if prof.Title == profile.Title {
 			return errors.New("duplicated title, please use unique title")
 		}
 	}
+	*p = append(*p, *profile)
 
-	p = append(p, profile)
 	return nil
+}
+
+func (p Profiles) Get(title string) (Profile, error) {
+	for _, prof := range p {
+		if prof.Title == title {
+			return prof, nil
+		}
+	}
+
+	return Profile{}, errors.New("profile not found")
+}
+
+func (p Profiles) Remove(title string) error {
+	for i, profile := range p {
+		if profile.Title == title {
+			p[i].deleted = true
+			return nil
+		}
+	}
+
+	return errors.New("passed profile not found")
 }
 
 func (p Profiles) Save() error {
@@ -59,17 +80,6 @@ func (p Profiles) Save() error {
 	return nil
 }
 
-func (p Profiles) Remove(title string) error {
-	for i, profile := range p {
-		if profile.Title == title {
-			p[i].deleted = true
-			return nil
-		}
-	}
-
-	return errors.New("passed profile not found")
-}
-
 func init() {
 	home, err := homedir.Dir()
 	if err != nil {
@@ -90,6 +100,7 @@ func init() {
 	}
 
 	if len(b) == 0 {
+		profiles = &Profiles{}
 		return
 	}
 

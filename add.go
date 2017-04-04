@@ -24,7 +24,7 @@ func (c *AddCommand) Run(args []string) int {
 		return 1
 	}
 
-	if err := profiles.Add(Profile{
+	if err := profiles.Add(&Profile{
 		Title: args[0],
 		Name:  args[1],
 		Email: args[2],

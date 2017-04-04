@@ -21,7 +21,7 @@ func (c *ListCommand) Help() string {
 
 func (c *ListCommand) Run(args []string) int {
 	var list string
-	for _, profile := range profiles {
+	for _, profile := range *profiles {
 		list += fmt.Sprintf("[%s]\n- %s\n- %s\n\n", profile.Title, profile.Name, profile.Email)
 	}
 	c.ui.Output(strings.TrimSpace(list))
