@@ -1,6 +1,10 @@
 package main
 
-import "github.com/mitchellh/cli"
+import (
+	"fmt"
+
+	"github.com/mitchellh/cli"
+)
 
 type RemoveCommand struct {
 	ui cli.Ui
@@ -15,5 +19,20 @@ func (c *RemoveCommand) Help() string {
 }
 
 func (c *RemoveCommand) Run(args []string) int {
+	if len(args) == 0 {
+		c.ui.Output(c.Help())
+		return 1
+	}
+
+	if err := profiles.Remove(args[0]); err != nil {
+		c.ui.Error(fmt.Sprint(err))
+		return 1
+	}
+
+	if err := profiles.Save(); err != nil {
+		c.ui.Error(fmt.Sprint(err))
+		return 1
+	}
+
 	return 0
 }

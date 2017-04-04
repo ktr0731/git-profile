@@ -28,9 +28,15 @@ type Profile struct {
 
 type Profiles []Profile
 
-func (p Profiles) Add(profile Profile) Profiles {
+func (p Profiles) Add(profile Profile) error {
+	for _, prof := range p {
+		if prof.Title == profile.Title {
+			return errors.New("duplicated title, please use unique title")
+		}
+	}
+
 	p = append(p, profile)
-	return p
+	return nil
 }
 
 func (p Profiles) Save() error {
@@ -53,10 +59,10 @@ func (p Profiles) Save() error {
 	return nil
 }
 
-func (p Profiles) Remove(profile Profile) error {
-	for _, prof := range p {
-		if prof == profile {
-			profile.deleted = true
+func (p Profiles) Remove(title string) error {
+	for i, profile := range p {
+		if profile.Title == title {
+			p[i].deleted = true
 			return nil
 		}
 	}
