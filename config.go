@@ -18,14 +18,30 @@ var configPath string
 var profiles Profiles
 
 type Profile struct {
-	Title, Name, Email string
+	Title string
+	Name  string
+	Email string
+
+	using   bool
+	deleted bool
 }
 
 type Profiles []Profile
 
-func (p *Profile) Save() error {
-	profiles = append(profiles, *p)
-	b, err := json.Marshal(profiles)
+func (p Profiles) Add(profile Profile) Profiles {
+	p = append(p, profile)
+	return p
+}
+
+func (p Profiles) Save() error {
+	tmp := make(Profiles, 0, len(p))
+	for _, profile := range p {
+		if !profile.deleted {
+			tmp = append(tmp, profile)
+		}
+	}
+
+	b, err := json.MarshalIndent(&tmp, "", "  ")
 	if err != nil {
 		return errors.Wrap(err, "failed to marshal profiles JSON")
 	}
@@ -35,6 +51,17 @@ func (p *Profile) Save() error {
 	}
 
 	return nil
+}
+
+func (p Profiles) Remove(profile Profile) error {
+	for _, prof := range p {
+		if prof == profile {
+			profile.deleted = true
+			return nil
+		}
+	}
+
+	return errors.New("passed profile not found")
 }
 
 func init() {
@@ -56,16 +83,12 @@ func init() {
 		panic(err)
 	}
 
+	if len(b) == 0 {
+		return
+	}
+
 	err = json.Unmarshal(b, &profiles)
 	if err != nil {
 		panic(err)
-	}
-}
-
-func NewProfile(title, name, email string) *Profile {
-	return &Profile{
-		Title: title,
-		Name:  name,
-		Email: email,
 	}
 }
