@@ -7,9 +7,6 @@ func commands(ui cli.Ui) map[string]cli.CommandFactory {
 		"add": func() (cli.Command, error) {
 			return &AddCommand{ui}, nil
 		},
-		"current": func() (cli.Command, error) {
-			return &CurrentCommand{ui}, nil
-		},
 		"list": func() (cli.Command, error) {
 			return &ListCommand{ui}, nil
 		},

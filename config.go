@@ -22,7 +22,6 @@ type Profile struct {
 	Name  string
 	Email string
 
-	using   bool
 	deleted bool
 }
 
