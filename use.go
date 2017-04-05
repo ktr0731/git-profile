@@ -2,10 +2,16 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
 
 	"github.com/mitchellh/cli"
 )
+
+func isGitRootDir() bool {
+	stat, err := os.Stat(".git")
+	return err == nil && stat.IsDir()
+}
 
 type UseCommand struct {
 	ui cli.Ui
@@ -22,6 +28,11 @@ func (c *UseCommand) Help() string {
 func (c *UseCommand) Run(args []string) int {
 	if len(args) == 0 {
 		c.ui.Output(c.Help())
+		return 1
+	}
+
+	if !isGitRootDir() {
+		c.ui.Output("not git repository or isn't root")
 		return 1
 	}
 
