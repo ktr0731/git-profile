@@ -32,7 +32,7 @@ func (c *UseCommand) Run(args []string) int {
 	}
 
 	if !isGitRootDir() {
-		c.ui.Output("not git repository or isn't root")
+		c.ui.Error("not git repository or isn't root")
 		return 1
 	}
 
