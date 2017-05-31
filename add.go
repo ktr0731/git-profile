@@ -24,7 +24,16 @@ func (c *AddCommand) Run(args []string) int {
 		return 1
 	}
 
-	if err := NewProfile(args[0], args[1], args[2]).Save(); err != nil {
+	if err := profiles.Add(&Profile{
+		Title: args[0],
+		Name:  args[1],
+		Email: args[2],
+	}); err != nil {
+		c.ui.Output(fmt.Sprintf("error in Profile.Add(): %s", err))
+		return 1
+	}
+
+	if err := profiles.Save(); err != nil {
 		c.ui.Output(fmt.Sprintf("error in Profile.Save(): %s", err))
 		return 1
 	}

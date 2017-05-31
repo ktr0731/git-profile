@@ -15,17 +15,59 @@ const (
 )
 
 var configPath string
-var profiles Profiles
+var profiles *Profiles
 
 type Profile struct {
-	Title, Name, Email string
+	Title string
+	Name  string
+	Email string
+
+	deleted bool
 }
 
 type Profiles []Profile
 
-func (p *Profile) Save() error {
-	profiles = append(profiles, *p)
-	b, err := json.Marshal(profiles)
+func (p *Profiles) Add(profile *Profile) error {
+	for _, prof := range *p {
+		if prof.Title == profile.Title {
+			return errors.New("duplicated title, please use unique title")
+		}
+	}
+	*p = append(*p, *profile)
+
+	return nil
+}
+
+func (p Profiles) Get(title string) (Profile, error) {
+	for _, prof := range p {
+		if prof.Title == title {
+			return prof, nil
+		}
+	}
+
+	return Profile{}, errors.New("profile not found")
+}
+
+func (p Profiles) Remove(title string) error {
+	for i, profile := range p {
+		if profile.Title == title {
+			p[i].deleted = true
+			return nil
+		}
+	}
+
+	return errors.New("passed profile not found")
+}
+
+func (p Profiles) Save() error {
+	tmp := make(Profiles, 0, len(p))
+	for _, profile := range p {
+		if !profile.deleted {
+			tmp = append(tmp, profile)
+		}
+	}
+
+	b, err := json.MarshalIndent(&tmp, "", "  ")
 	if err != nil {
 		return errors.Wrap(err, "failed to marshal profiles JSON")
 	}
@@ -74,13 +116,5 @@ func init() {
 
 	if json.NewDecoder(f).Decode(&profiles); err != nil {
 		panic(err)
-	}
-}
-
-func NewProfile(title, name, email string) *Profile {
-	return &Profile{
-		Title: title,
-		Name:  name,
-		Email: email,
 	}
 }
