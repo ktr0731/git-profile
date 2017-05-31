@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	profileFile = "profiles"
+	profileFile = "profiles.json"
 )
 
 var configPath string
@@ -37,27 +37,42 @@ func (p *Profile) Save() error {
 	return nil
 }
 
+func file() (*os.File, error) {
+	if _, err := os.Stat(configPath); os.IsNotExist(err) {
+		os.MkdirAll(configPath, 0755)
+		f, err := os.Create(filepath.Join(configPath, profileFile))
+		if err != nil {
+			return nil, err
+		}
+		if err := json.NewEncoder(f).Encode(&Profiles{}); err != nil {
+			return nil, err
+		}
+		return f, nil
+	} else if err != nil {
+		return nil, err
+	}
+
+	f, err := os.Open(filepath.Join(configPath, profileFile))
+	if err != nil {
+		return nil, err
+	}
+	return f, nil
+}
+
 func init() {
 	home, err := homedir.Dir()
 	if err != nil {
 		panic(err)
 	}
-	configPath = filepath.Join(home, ".config", "git-config")
+	configPath = filepath.Join(home, ".config", "git-profile")
 
-	os.MkdirAll(configPath, 0755)
-	f, err := os.OpenFile(filepath.Join(configPath, profileFile), os.O_RDWR|os.O_CREATE, 0644)
+	f, err := file()
 	if err != nil {
 		panic(err)
 	}
 	defer f.Close()
 
-	b, err := ioutil.ReadAll(f)
-	if err != nil {
-		panic(err)
-	}
-
-	err = json.Unmarshal(b, &profiles)
-	if err != nil {
+	if json.NewDecoder(f).Decode(&profiles); err != nil {
 		panic(err)
 	}
 }
