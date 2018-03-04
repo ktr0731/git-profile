@@ -9,7 +9,7 @@ You can switch some profiles(set of username, email) with one command.
 
 ## Installation
 ``` sh
-$ go get github.com/lycoris0731/git-profile
+$ go get github.com/ktr0731/git-profile
 ```
 
 ## Usage
